@@ -34,14 +34,15 @@ exports.getUsers = async () => {
 
 exports.getById = async (id) => {
   const user = await prisma.user.findUnique({
-    where: { id },
+    where: { id: Number(id) },
   });
-    return user;
+
+  return user;
 };
 
 exports.updateUser = async (id, data) => {
   const user = await prisma.user.update({
-    where: { id },
+    where: { id: Number(id) },
     data,
   });
   return user;
@@ -49,7 +50,7 @@ exports.updateUser = async (id, data) => {
 
 exports.deleteUser = async (id) => {
   await prisma.user.delete({
-    where: { id },
+    where: { id: Number(id) },
   });
   return { message: "User deleted successfully" };
 };
