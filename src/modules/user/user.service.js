@@ -1,4 +1,5 @@
 const prisma = require("../../config/prisma");
+const error = require("../../utils/response").error;
 
 exports.createUser = async ({ name, email, role, status }) => {
   try {
@@ -6,21 +7,49 @@ exports.createUser = async ({ name, email, role, status }) => {
       data: {
         name,
         email,
-        role,
         status: true,
       },
     });
 
-    return user;
-  } catch (error) {
-    if (error.code === "P2002") {
+    if(existEmail) {
       throw new Error("Email already exists");
     }
+
+    return user;
+  } catch (error) {
     throw error;
   }
 };
 
 exports.getUsers = async () => {
-  const users = await prisma.user.findMany();
+  const users = await prisma.user.findMany({
+    where: {
+      role: {
+        not: "Admin"
+      }
+    }
+  });
   return users;
+};
+
+exports.getById = async (id) => {
+  const user = await prisma.user.findUnique({
+    where: { id },
+  });
+    return user;
+};
+
+exports.updateUser = async (id, data) => {
+  const user = await prisma.user.update({
+    where: { id },
+    data,
+  });
+  return user;
+};
+
+exports.deleteUser = async (id) => {
+  await prisma.user.delete({
+    where: { id },
+  });
+  return { message: "User deleted successfully" };
 };
