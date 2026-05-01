@@ -20,8 +20,23 @@ exports.createProduct = async ({ name, price, stock, status, categoryId }) => {
 };
 
 exports.getProducts = async () => {
-    const products = await prisma.product.findMany();
-    return products;
+    const products = await prisma.product.findMany({
+        include: {
+            category: {
+                select: { name: true },
+            },
+        },
+    });
+
+    return products.map(p => ({
+        id: p.id,
+        name: p.name,
+        price: p.price,
+        stock: p.stock,
+        status: p.status,
+        category: p.category.name,
+        createdAt: p.createdAt,
+    }));
 };
 
 exports.getById = async (id) => {
