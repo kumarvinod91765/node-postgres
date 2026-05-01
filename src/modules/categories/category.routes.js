@@ -1,4 +1,4 @@
-const router = require("../user/user.routes");
+const router = require("express").Router();
 const controller = require("./category.controller");    
 
 router.post("/", controller.createCategory);
