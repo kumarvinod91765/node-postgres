@@ -17,3 +17,11 @@ model User {
   status    Boolean?
   createdAt DateTime @default(now())
 }
+
+model Category {
+  id            Int    @id @default(autoincrement())
+  name          String
+  description   String
+  status        Boolean?
+  createdAt     DateTime @default(now())
+}

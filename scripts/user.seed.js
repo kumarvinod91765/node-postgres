@@ -1,62 +1,51 @@
 const { PrismaClient } = require("@prisma/client");
 const { faker } = require("@faker-js/faker");
-const bcrypt = require("bcrypt");
+
 const prisma = new PrismaClient();
 
-// async function updatePasswords() {
-//   try {
-//     console.log("Updating passwords...");
+async function main() {
+    console.log("Seeding database...");
+    const users = [];
+    for (let i = 0; i < 1000; i++) {
+        users.push({
+            name: faker.person.fullName(),
+            email: faker.internet.email().toLowerCase(),
+            password: faker.internet.password(),
+            role: "user",
+            status: faker.datatype.boolean(),
+        });
+    }
 
-//     const hashedPassword = await bcrypt.hash("123456", 10);
+    await prisma.user.createMany({
+        data: users,
+        skipDuplicates: true,
+    });
 
-//     await prisma.user.updateMany({
-//       data: {
-//         password: hashedPassword,
-//       },
-//     });
+    console.log("1000 Users created");
 
-//     console.log("All users updated with hashed password!");
-//   } catch (err) {
-//     console.error("Error:", err);
-//   } finally {
-//     await prisma.$disconnect();
-//   }
-// }
+    //Create 500 Categories
+    const categories = [];
+    for (let i = 0; i < 500; i++) {
+        categories.push({
+            name: faker.commerce.department(),
+            description: faker.commerce.productDescription(),
+            status: faker.datatype.boolean(),
+        });
+    }
 
-// updatePasswords();
+    await prisma.category.createMany({
+        data: categories,
+    });
 
-// function generateUsers(count = 1000) {
-//   const users = [];
+    console.log("500 Categories created");
 
-//   for (let i = 1; i <= count; i++) {
-//     users.push({
-//       name: faker.person.fullName(),
-//       email: faker.internet.email().toLowerCase(),
-//       role: i === 1 ? "admin" : "user", 
-//       status: faker.datatype.boolean(),
-//     });
-//   }
+    console.log("Seeding completed!");
+}
 
-//   return users;
-// }
-
-// async function main() {
-//   try {
-//     console.log("Generating users...");
-
-//     const users = generateUsers(1000);
-
-//     await prisma.user.createMany({
-//       data: users,
-//       skipDuplicates: true,
-//     });
-
-//     console.log("Users inserted successfully!");
-//   } catch (err) {
-//     console.error("Error:", err);
-//   } finally {
-//     await prisma.$disconnect();
-//   }
-// }
-
-// main();
+main()
+    .catch((e) => {
+        console.error("Error:", e);
+    })
+    .finally(async () => {
+        await prisma.$disconnect();
+    });
