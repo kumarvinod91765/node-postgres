@@ -1,5 +1,6 @@
 const prisma = require("../config/prisma");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 const error = require("../utils/response").error;
 
 exports.login = async ({ email, password }) => {
@@ -8,7 +9,9 @@ exports.login = async ({ email, password }) => {
       where: { email, role: "Admin" },
     });
 
-    if (!user || user.password !== password) {
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!user || !isMatch) {
       throw new Error("Invalid email or password");
     }
 

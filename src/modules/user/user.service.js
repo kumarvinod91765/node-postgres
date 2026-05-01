@@ -1,19 +1,28 @@
 const prisma = require("../../config/prisma");
 const error = require("../../utils/response").error;
+const bcrypt = require("bcrypt");
 
-exports.createUser = async ({ name, email, role, status }) => {
+exports.createUser = async ({ name, email, password, role, status }) => {
   try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+        const existingUser = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (existingUser) {
+      throw new Error("Email already exists");
+    }
+
     const user = await prisma.user.create({
       data: {
         name,
         email,
+        password: hashedPassword,
+        role,
         status: true,
       },
     });
-
-    if(existEmail) {
-      throw new Error("Email already exists");
-    }
 
     return user;
   } catch (error) {
@@ -43,7 +52,10 @@ exports.getById = async (id) => {
 exports.updateUser = async (id, data) => {
   const user = await prisma.user.update({
     where: { id: Number(id) },
-    data,
+    data: {
+      ...data,
+      password: undefined 
+    },
   });
   return user;
 };
