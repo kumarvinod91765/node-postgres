@@ -1,23 +1,23 @@
-// const pool = require("../config/db");
-// const jwt = require("jsonwebtoken");
+const prisma = require("../config/prisma");
+const jwt = require("jsonwebtoken");
+const error = require("../utils/response").error;
 
-// exports.login = async ({ email }) => {
-//   const result = await pool.query(
-//     "SELECT * FROM users WHERE email = $1",
-//     [email]
-//   );
+exports.login = async ({ email, password }) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { email, role: "Admin" },
+    });
 
-//   if (!result.rows.length) {
-//     throw new Error("User not found");
-//   }
+    if (!user || user.password !== password) {
+      throw new Error("Invalid email or password");
+    }
 
-//   const user = result.rows[0];
+    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
+      expiresIn: "10h",
+    });
 
-//   const token = jwt.sign(
-//     { id: user.id },
-//     process.env.JWT_SECRET,
-//     { expiresIn: "1d" }
-//   );
-
-//   return { user, token };
-// };
+    return { token };
+  } catch (error) {
+    throw error;
+  }
+};
