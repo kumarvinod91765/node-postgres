@@ -3,53 +3,81 @@ const { faker } = require("@faker-js/faker");
 
 const prisma = new PrismaClient();
 
-// async function main() {
-//   console.log("Seeding started...");
-//   const USER_COUNT = 1000;
-//   const CATEGORY_COUNT = 500;
+async function main() {
+    console.log("🌱 Seeding 200 orders...");
 
-//   await prisma.category.deleteMany();
-//   await prisma.user.deleteMany();
+    // Get existing users & products
+    const users = await prisma.user.findMany();
+    const products = await prisma.product.findMany();
 
-//   const users = [];
-//   for (let i = 0; i < USER_COUNT; i++) {
-//     users.push({
-//       name: faker.person.fullName(),
-//       email: `user${i}@test.com`,
-//       password: faker.internet.password(),
-//       role: "user",
-//       status: faker.datatype.boolean(),
-//     });
-//   }
+    if (!users.length || !products.length) {
+        throw new Error("Users or Products not found. Seed them first.");
+    }
 
-//   const userResult = await prisma.user.createMany({
-//     data: users,
-//   });
+    for (let i = 0; i < 200; i++) {
+        const randomUser = faker.helpers.arrayElement(users);
 
-//   console.log("Users created:", userResult.count);
+        // Random number of items (1–5)
+        const itemCount = faker.number.int({ min: 1, max: 5 });
 
-//   const categories = [];
-//   for (let i = 0; i < CATEGORY_COUNT; i++) {
-//     categories.push({
-//       name: `Category ${i}`,
-//       description: faker.commerce.productDescription(),
-//       status: faker.datatype.boolean(),
-//     });
-//   }
+        let totalPrice = 0;
+        const itemsData = [];
 
-//   const categoryResult = await prisma.category.createMany({
-//     data: categories,
-//   });
+        for (let j = 0; j < itemCount; j++) {
+            const product = faker.helpers.arrayElement(products);
+            const quantity = faker.number.int({ min: 1, max: 3 });
 
-//   console.log("Categories created:", categoryResult.count);
+            const price = Number(product.price);
+            totalPrice += price * quantity;
 
-//   console.log("Seeding completed!");
-// }
+            itemsData.push({
+                productId: product.id,
+                quantity,
+                price,
+            });
+        }
 
-// main()
-//   .catch((e) => {
-//     console.error("Error:", e);
-//   })
-//   .finally(async () => {
-//     await prisma.$disconnect();
-//   });
+        // Create Order with items (transaction)
+        await prisma.$transaction(async (tx) => {
+            const order = await tx.order.create({
+                data: {
+                    userId: randomUser.id,
+                    totalPrice,
+                    status: faker.helpers.arrayElement([
+                        "PENDING",
+                        "PAID",
+                        "SHIPPED",
+                        "COMPLETED",
+                        "CANCELLED",
+                    ]),
+                },
+            });
+
+            for (const item of itemsData) {
+                await tx.orderItem.create({
+                    data: {
+                        orderId: order.id,
+                        productId: item.productId,
+                        quantity: item.quantity,
+                        price: item.price,
+                    },
+                });
+            }
+        });
+
+        if (i % 20 === 0) {
+            console.log(`✅ Created ${i} orders`);
+        }
+    }
+
+    console.log("🎉 200 orders seeded successfully!");
+}
+
+main()
+    .catch((e) => {
+        console.error(e);
+        process.exit(1);
+    })
+    .finally(async () => {
+        await prisma.$disconnect();
+    });
