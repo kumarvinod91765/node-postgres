@@ -79,7 +79,7 @@ exports.deleteUser = async (req, res, next) => {
 
 exports.adminProfile = async (req, res, next) => {
   try {
-    const role = "admin";
+    const role = "Admin";
 
     const result = await service.getAdminProfile(role);
 
