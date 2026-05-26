@@ -7,5 +7,6 @@ router.get("/", authMiddleware, controller.getUsers);
 router.get("/:id", authMiddleware, controller.getById);
 router.put("/:id", authMiddleware, controller.updateUser);
 router.delete("/:id", authMiddleware, controller.deleteUser);
+router.get("/admin-profile", authMiddleware, controller.adminProfile);
 
 module.exports = router;

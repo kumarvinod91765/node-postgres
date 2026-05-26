@@ -66,3 +66,14 @@ exports.deleteUser = async (id) => {
   });
   return { message: "User deleted successfully" };
 };
+
+exports.getAdminProfile = async (role) => {
+  const admin = await prisma.user.findFirst({
+    where: { role: role }
+  });
+
+  return {
+    message: "Admin profile get successfully.",
+    data: admin
+  };
+};

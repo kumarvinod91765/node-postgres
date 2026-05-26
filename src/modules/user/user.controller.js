@@ -76,3 +76,15 @@ exports.deleteUser = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.adminProfile = async (req, res, next) => {
+  try {
+    const role = "admin";
+
+    const result = await service.getAdminProfile(role);
+
+    res.json(result);
+  } catch (error) {
+    next(error);
+  }
+};
