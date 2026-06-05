@@ -1,0 +1,39 @@
+name: CD — Deploy to Production
+
+on:
+  push:
+    branches: [main, master]  # Only deploy from main/master
+
+# Cancel in-progress deploys on new push to same branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ──────────────────────────────────────────────
+  # JOB: Deploy (only runs after CI passes)
+  # ──────────────────────────────────────────────
+  deploy:
+    name: 🚀 Deploy to Render
+    runs-on: ubuntu-latest
+
+    # Only run if the CI workflow succeeded on the same commit
+    # This prevents deploying broken code
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Trigger Render Deploy Hook
+        # Add your Render Deploy Hook URL as a GitHub Secret named RENDER_DEPLOY_HOOK_URL
+        # Go to: Render Dashboard → Your Service → Settings → Deploy Hook → Copy URL
+        # Then: GitHub Repo → Settings → Secrets and variables → Actions → New repository secret
+        run: |
+          echo "🚀 Triggering deployment to Render..."
+          curl --fail -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
+          echo "✅ Deploy hook triggered successfully!"
+
+      - name: Deployment Complete
+        run: |
+          echo "🎉 Deployment triggered for commit ${{ github.sha }}"
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Triggered by: ${{ github.actor }}"

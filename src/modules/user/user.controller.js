@@ -1,12 +1,11 @@
 const service = require("./user.service");
-const error = require("../../utils/response").error;
 
 exports.createUser = async (req, res, next) => {
   try {
     const user = await service.createUser(req.body);
     res.json(user);
-  } catch (error) {
-    next(error);
+  } catch (err) {
+    next(err);
   }
 };
 
@@ -14,8 +13,8 @@ exports.getUsers = async (req, res, next) => {
   try {
     const users = await service.getUsers();
     res.json(users);
-  } catch (error) {
-    next(error);
+  } catch (err) {
+    next(err);
   }
 };
 
@@ -36,8 +35,8 @@ exports.getById = async (req, res, next) => {
       success: true,
       data: user,
     });
-  } catch (error) {
-    next(error);
+  } catch (err) {
+    next(err);
   }
 };
 
@@ -54,8 +53,8 @@ exports.updateUser = async (req, res, next) => {
 
     const user = await service.updateUser(id, req.body);
     res.json(user);
-  } catch (error) {
-    next(error);
+  } catch (err) {
+    next(err);
   }
 };
 
@@ -72,8 +71,8 @@ exports.deleteUser = async (req, res, next) => {
 
     const result = await service.deleteUser(id);
     res.json(result);
-  } catch (error) {
-    next(error);
+  } catch (err) {
+    next(err);
   }
 };
 
@@ -84,7 +83,7 @@ exports.adminProfile = async (req, res, next) => {
     const result = await service.getAdminProfile(role);
 
     res.json(result);
-  } catch (error) {
-    next(error);
+  } catch (err) {
+    next(err);
   }
 };

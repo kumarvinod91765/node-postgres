@@ -1,5 +1,12 @@
 node_modules
+
 # Keep environment variables out of version control
 .env
 .env.production
+.env.test
+
+# Generated Prisma client
 /src/generated/prisma
+
+# Jest coverage output
+coverage/

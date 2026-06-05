@@ -1,26 +1,23 @@
 const prisma = require("../../config/prisma");
-const error = require("../../utils/response").error;
 
 exports.createCategory = async ({ name, description }) => {
-  try {
-    const category = await prisma.category.create({
-        data: {
-            name,
-            description,
-        },
-    });
-    return category;
-  } catch (error) {
-    throw error;
-  }
+  const category = await prisma.category.create({
+    data: {
+      name,
+      description,
+    },
+  });
+  return category;
 };
 
 exports.getCategories = async () => {
   const categories = await prisma.category.findMany({
-    include: {
-      _count: {
-        select: { products: true },
-      },
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      status: true,
+      createdAt: true,
     },
   });
 
@@ -43,11 +40,11 @@ exports.updateCategory = async (id, data) => {
     data,
   });
   return category;
-}
+};
 
 exports.deleteCategory = async (id) => {
   await prisma.category.delete({
     where: { id: Number(id) },
-    });
-    return { success: true, message: "Category deleted successfully" };
+  });
+  return { success: true, message: "Category deleted successfully" };
 };
