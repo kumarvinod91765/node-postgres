@@ -23,3 +23,36 @@ exports.login = async ({ email, password }) => {
 
   return { token };
 };
+
+exports.changePassword = async (userId, { currentPassword, newPassword, confirmPassword }) => {
+  const user = await prisma.user.findUnique({
+    where: { id: Number(userId) },
+  });
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  const isMatch = await bcrypt.compare(currentPassword, user.password);
+
+  if (!isMatch) {
+    throw new Error("Current password is incorrect");
+  }
+
+  if (!newPassword || !confirmPassword) {
+    throw new Error("New password and confirmation are required");
+  }
+
+  if (newPassword !== confirmPassword) {
+    throw new Error("New passwords do not match");
+  }
+
+  const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
+  await prisma.user.update({
+    where: { id: Number(userId) },
+    data: { password: hashedNewPassword },
+  });
+
+  return { success: true, message: "Password changed successfully" };
+};
