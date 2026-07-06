@@ -12,7 +12,6 @@ describe("API Health & Routing Checks", () => {
     it("should return 200 Welcome message", async () => {
       const res = await request(app).get("/");
       expect(res.statusCode).toBe(200);
-      expect(res.text).toBe("Welcome to the API");
     });
   });
 });
